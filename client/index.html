@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Electricity Price</title>
+    <style>
+        /* Add some basic styles for the table */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        .highlight-green {
+            color: green;
+        }
+        .highlight-red {
+            color: red;
+        }
+        /* Styles for the scrollable container */
+        .scrollable-container {
+            overflow-x: auto;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Current Electricity Price</h1>
+<p id="price">Fetching...</p>
+
+<h2>PriceWithTax for Each Hour</h2>
+<div class="scrollable-container">
+    <table>
+        <thead>
+            <tr id="hours"></tr>
+        </thead>
+        <tbody>
+            <tr id="prices"></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Fetch data for the current price
+    fetch('https://api.spot-hinta.fi/JustNow?region=FI')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('price').textContent = "Price: " + data.price + " EUR"; // Replace with the correct key if needed
+    })
+    .catch(error => {
+        console.error('There was an error fetching the data:', error);
+        document.getElementById('price').textContent = "Failed to fetch the current price.";
+    });
+
+    // Fetch data for the entire day's prices
+    fetch('https://api.spot-hinta.fi/Today?region=FI')
+    .then(response => response.json())
+    .then(jsonData => {
+        const hoursElement = document.getElementById('hours');
+        const pricesElement = document.getElementById('prices');
+        
+        // Extract all the PriceWithTax values
+        const allPrices = jsonData.map(entry => entry.PriceWithTax);
+        
+        // Determine the three lowest and highest prices
+        const sortedPrices = [...allPrices].sort((a, b) => a - b);
+        const threeLowestPrices = sortedPrices.slice(0, 3);
+        const threeHighestPrices = sortedPrices.slice(-3);
+
+        jsonData.forEach(entry => {
+            const hour = new Date(entry.DateTime).getHours();
+            hoursElement.innerHTML += `<th>${hour}:00</th>`;
+            
+            // Check if the current price is one of the three lowest or highest
+            if (threeLowestPrices.includes(entry.PriceWithTax)) {
+                pricesElement.innerHTML += `<td class="highlight-green">${entry.PriceWithTax}</td>`;
+            } else if (threeHighestPrices.includes(entry.PriceWithTax)) {
+                pricesElement.innerHTML += `<td class="highlight-red">${entry.PriceWithTax}</td>`;
+            } else {
+                pricesElement.innerHTML += `<td>${entry.PriceWithTax}</td>`;
+            }
+        });
+    })
+    .catch(error => {
+        console.error('There was an error fetching the data for the day:', error);
+    });
+</script>
+
+</body>
+</html>
