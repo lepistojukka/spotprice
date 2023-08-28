@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Electricity Price</title>
+</head>
+<body>
+
+<h1>Current Electricity Price</h1>
+<p id="price">Fetching...</p>
+
+<script>
+    // Fetch data from the provided API
+    fetch('https://api.spot-hinta.fi/JustNow?region=FI')
+    .then(response => response.json())
+    .then(data => {
+        // Display the price or any other required data from the API response
+        document.getElementById('price').textContent = "Price: " + data.price + " EUR"; // Replace 'price' with the actual key from the API response if different
+    })
+    .catch(error => {
+        console.error('There was an error fetching the data:', error);
+        document.getElementById('price').textContent = "Failed to fetch the current price.";
+    });
+</script>
+
+</body>
+</html>
