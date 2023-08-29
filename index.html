@@ -47,10 +47,10 @@
 
 <script>
     // Fetch data for the current price
-    fetch('https://api.spot-hinta.fi/JustNow?region=FI')
+    fetch('https://v1.nocodeapi.com/lepisto/ep/DdkVDFrmqgGcHUsy')
     .then(response => response.json())
     .then(data => {
-        document.getElementById('price').textContent = "Price: " + data.price + " EUR"; // Replace with the correct key if needed
+        document.getElementById('price').textContent = "Price: " + data.PriceWithTax + " EUR"; // Replace with the correct key if needed
     })
     .catch(error => {
         console.error('There was an error fetching the data:', error);
@@ -58,7 +58,7 @@
     });
 
     // Fetch data for the entire day's prices
-    fetch('https://api.spot-hinta.fi/Today?region=FI')
+    fetch('https://v1.nocodeapi.com/lepisto/ep/luuLDQWhLelKITzP')
     .then(response => response.json())
     .then(jsonData => {
         const hoursElement = document.getElementById('hours');
