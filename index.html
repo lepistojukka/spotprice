@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Current Electricity Price</title>
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Current Electricity Price</title>
+<style>
         /* Add some basic styles for the table */
         table {
             border-collapse: collapse;
@@ -29,28 +30,25 @@
     </style>
 </head>
 <body>
-
 <h1>Current Electricity Price</h1>
 <p id="price">Fetching...</p>
-
 <h2>PriceWithTax for Each Hour</h2>
 <div class="scrollable-container">
-    <table>
-        <thead>
-            <tr id="hours"></tr>
-        </thead>
-        <tbody>
-            <tr id="prices"></tr>
-        </tbody>
-    </table>
+<table>
+<thead>
+<tr id="hours"><td>hours</td></tr>
+</thead>
+<tbody>
+<tr id="prices"><td>price</td></tr>
+</tbody>
+</table>
 </div>
-
 <script>
     // Fetch data for the current price
     fetch('https://v1.nocodeapi.com/lepisto/ep/DdkVDFrmqgGcHUsy')
     .then(response => response.json())
     .then(data => {
-        document.getElementById('price').textContent = "Price: " + data.PriceWithTax + " EUR"; // Replace with the correct key if needed
+        document.getElementById('price').textContent = 100*data.PriceWithTax + " c/kWh"; // Replace with the correct key if needed
     })
     .catch(error => {
         console.error('There was an error fetching the data:', error);
@@ -64,6 +62,11 @@
         const hoursElement = document.getElementById('hours');
         const pricesElement = document.getElementById('prices');
         
+        jsonData.forEach(entry => {
+            entry.PriceWithTax = 100*entry.PriceWithTax;
+            entry.PriceWithTax = entry.PriceWithTax.toFixed(2);
+        });
+
         // Extract all the PriceWithTax values
         const allPrices = jsonData.map(entry => entry.PriceWithTax);
         
@@ -90,6 +93,5 @@
         console.error('There was an error fetching the data for the day:', error);
     });
 </script>
-
 </body>
 </html>
