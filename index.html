@@ -1,27 +1,38 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Current Electricity Price</title>
-<style>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Current Electricity Price</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
         /* Add some basic styles for the table */
         table {
             border-collapse: collapse;
             width: 100%;
         }
-        th, td {
+
+        th,
+        td {
             border: 1px solid black;
             padding: 8px;
             text-align: center;
         }
+
+        .center {
+            text-align: center;
+        }
+
         .highlight-green {
             color: green;
         }
+
         .highlight-red {
             color: red;
         }
+
         /* Styles for the scrollable container */
         .scrollable-container {
             overflow-x: auto;
@@ -29,69 +40,128 @@
         }
     </style>
 </head>
+
 <body>
-<h1>Current Electricity Price</h1>
-<p id="price">Fetching...</p>
-<h2>PriceWithTax for Each Hour</h2>
-<div class="scrollable-container">
-<table>
-<thead>
-<tr id="hours"><td>hours</td></tr>
-</thead>
-<tbody>
-<tr id="prices"><td>price</td></tr>
-</tbody>
-</table>
-</div>
-<script>
-    // Fetch data for the current price
-    fetch('https://v1.nocodeapi.com/lepisto/ep/DdkVDFrmqgGcHUsy')
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('price').textContent = 100*data.PriceWithTax + " c/kWh"; // Replace with the correct key if needed
-    })
-    .catch(error => {
-        console.error('There was an error fetching the data:', error);
-        document.getElementById('price').textContent = "Failed to fetch the current price.";
-    });
+    <h1>Current Electricity Price</h1>
+    <p class="center" id="price">Fetching...</p>
+    <h2>PriceWithTax for Each Hour</h2>
+    <div class="scrollable-container">
+        <table>
+            <thead>
+                <tr id="hours">
+                    <td>hours</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="prices">
+                    <td>price</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <canvas id="myChart" width="800" height="600"></canvas>
+    <script>
+        // Fetch data for the current price
+        fetch('https://v1.nocodeapi.com/lepisto/ep/DdkVDFrmqgGcHUsy')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('price').textContent = 100 * data.PriceWithTax + " c/kWh"; // Replace with the correct key if needed
+            })
+            .catch(error => {
+                console.error('There was an error fetching the data:', error);
+                document.getElementById('price').textContent = "Failed to fetch the current price.";
+            });
 
-    // Fetch data for the entire day's prices
-    fetch('https://v1.nocodeapi.com/lepisto/ep/luuLDQWhLelKITzP')
-    .then(response => response.json())
-    .then(jsonData => {
-        const hoursElement = document.getElementById('hours');
-        const pricesElement = document.getElementById('prices');
-        
-        jsonData.forEach(entry => {
-            entry.PriceWithTax = 100*entry.PriceWithTax;
-            entry.PriceWithTax = entry.PriceWithTax.toFixed(2);
-        });
+        // Fetch data for the entire day's prices
+        fetch('https://v1.nocodeapi.com/lepisto/ep/luuLDQWhLelKITzP')
+            .then(response => response.json())
+            .then(jsonData => {
+                const hoursElement = document.getElementById('hours');
+                const pricesElement = document.getElementById('prices');
 
-        // Extract all the PriceWithTax values
-        const allPrices = jsonData.map(entry => entry.PriceWithTax);
-        
-        // Determine the three lowest and highest prices
-        const sortedPrices = [...allPrices].sort((a, b) => a - b);
-        const threeLowestPrices = sortedPrices.slice(0, 3);
-        const threeHighestPrices = sortedPrices.slice(-3);
+                jsonData.forEach(entry => {
+                    entry.PriceWithTax = 100 * entry.PriceWithTax;
+                    entry.PriceWithTax = entry.PriceWithTax.toFixed(2);
+                });
 
-        jsonData.forEach(entry => {
-            const hour = new Date(entry.DateTime).getHours();
-            hoursElement.innerHTML += `<th>${hour}:00</th>`;
-            
-            // Check if the current price is one of the three lowest or highest
-            if (threeLowestPrices.includes(entry.PriceWithTax)) {
-                pricesElement.innerHTML += `<td class="highlight-green">${entry.PriceWithTax}</td>`;
-            } else if (threeHighestPrices.includes(entry.PriceWithTax)) {
-                pricesElement.innerHTML += `<td class="highlight-red">${entry.PriceWithTax}</td>`;
-            } else {
-                pricesElement.innerHTML += `<td>${entry.PriceWithTax}</td>`;
-            }
-        });
-    })
-    .catch(error => {
-        console.error('There was an error fetching the data for the day:', error);
-    });
-</script>
+                // Extract all the PriceWithTax values
+                const allPrices = jsonData.map(entry => entry.PriceWithTax);
+
+                // Determine the three lowest and highest prices
+                const sortedPrices = [...allPrices].sort((a, b) => a - b);
+                const threeLowestPrices = sortedPrices.slice(0, 3);
+                const threeHighestPrices = sortedPrices.slice(-3);
+
+                jsonData.forEach(entry => {
+                    const hour = new Date(entry.DateTime).getHours();
+                    hoursElement.innerHTML += `<th>${hour}:00</th>`;
+
+                    // Check if the current price is one of the three lowest or highest
+                    if (threeLowestPrices.includes(entry.PriceWithTax)) {
+                        pricesElement.innerHTML += `<td class="highlight-green">${entry.PriceWithTax}</td>`;
+                    } else if (threeHighestPrices.includes(entry.PriceWithTax)) {
+                        pricesElement.innerHTML += `<td class="highlight-red">${entry.PriceWithTax}</td>`;
+                    } else {
+                        pricesElement.innerHTML += `<td>${entry.PriceWithTax}</td>`;
+                    }
+                });
+                console.log(jsonData);
+
+                const labels = jsonData.map(d => d.DateTime);
+                const prices = jsonData.map(d => d.PriceWithTax);
+
+                const ctx = document.getElementById('myChart').getContext('2d');
+                const myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: prices,
+                            backgroundColor: 'blue',
+                            borderColor: 'blue',
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: false
+                            },
+                            legend: {
+                                display: false
+                            },
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    callback: function (value, index, values) {
+
+                                        return value; // Extract only the time part for display
+                                    }
+                                }
+                            },
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('There was an error fetching the data for the day:', error);
+            });
+
+
+        // Sample data from the JSON file
+        const data = [
+            { "DateTime": "2023-08-30T00:00:00+03:00", "PriceWithTax": 0.0335 },
+            { "DateTime": "2023-08-30T01:00:00+03:00", "PriceWithTax": 0.0570 },
+            { "DateTime": "2023-08-30T02:00:00+03:00", "PriceWithTax": 0.0409 },
+            { "DateTime": "2023-08-30T03:00:00+03:00", "PriceWithTax": 0.0423 },
+            { "DateTime": "2023-08-30T04:00:00+03:00", "PriceWithTax": 0.0472 }
+        ];
+    </script>
 </body>
+
 </html>
